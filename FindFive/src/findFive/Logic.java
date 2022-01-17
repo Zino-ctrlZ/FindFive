@@ -28,12 +28,12 @@ public class Logic {
 		String statusMessage = ""; 
 		//error checking on parameters
 		if( player != 1 && player != 2) {
-			statusMessage += "invalid player Integer"; //invalid player integer
+			statusMessage = "invalid player Integer"; //invalid player integer
 			return statusMessage; 
 		}
 		
 		if(columnEntry < 0 || columnEntry >= COLUMN) {
-			statusMessage += "invalid column Integer"; //invalid column entry
+			statusMessage = "invalid column Integer"; //invalid column entry
 			return statusMessage; 
 		}
 		
@@ -56,7 +56,7 @@ public class Logic {
 		}
 		else {
 			gameBoard[rowIndex][columnEntry] = playerEntry; 
-			statusMessage += "successful"; 
+			statusMessage = "successful"; 
 		}
 		
 		return statusMessage; 

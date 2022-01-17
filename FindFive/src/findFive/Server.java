@@ -6,11 +6,12 @@ package findFive;
 
 import java.io.*;
 import java.net.*;
+import java.util.Date;
 
 public class Server {
 	private ServerSocket serverSocket; 
 	private Player[] players;  
-	private boolean playersComplete; 
+	
 	private PrintWriter out; 
 	private BufferedReader in; 
 	
@@ -20,8 +21,7 @@ public class Server {
 	
 	
 	public Server() {
-		players = new Player[2];  
-		playersComplete = false; 
+		players = new Player[NUM_OF_PLAYERS];  
 		gameLogic = new Logic(); 
 	}
 	
@@ -30,7 +30,7 @@ public class Server {
 			public void run() {
 				try {
 					int currentPlayers = 0;
-					boolean gameStatus =  false; 
+					boolean gameBegun =  false; 
 					serverSocket = new ServerSocket(port); 
 					System.out.println("Server up at port: " + port);
 					while(true) {
@@ -50,10 +50,6 @@ public class Server {
 								System.out.println("Player " + currentPlayers + " connection failed");
 							}
 							
-							if(currentPlayers == NUM_OF_PLAYERS) {
-								playersComplete = true; 
-							}
-							
 							
 						}
 						else{
@@ -62,9 +58,14 @@ public class Server {
 							out.println(0); 
 						}
 						
-						if(playersComplete && !gameStatus) {
-							gameStatus = true; 
+						if(isPlayersComplete() && !gameBegun) {
+							gameBegun = true; 
 							runGame(); 
+						}
+						
+						if(gameBegun && isPlayersComplete() == false) {
+							closeConnection(); 
+							return; 
 						}
 					}
 		
@@ -81,36 +82,58 @@ public class Server {
 		createAndListenThread.start();
 	}
 	
+	/**
+	 * Check if desired number of players are connected 
+	 * @return
+	 */
+	public boolean isPlayersComplete() {
+		boolean complete = true; 
+		for(int index = 0; index < NUM_OF_PLAYERS; index++) {
+			if(players[index] == null || !players[index].isConnected()) {
+				complete = false; 
+				return complete; 
+			}
+		}
+		return complete; 
+	}
+	
+	/**
+	 * Close connection with all players 
+	 */
+	public void closeConnection() {
+		System.out.print("Players not complete...closing socket");
+		for(int index = 0; index < NUM_OF_PLAYERS; index++) {
+			players[index].sendMessage("Game over..closing");
+			players[index].close(); 
+		}
+		try {
+			serverSocket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void runGame() {
 		System.out.print(gameLogic.toString());
-		if(playersComplete) { //send initial gameBoard to all players
+		if(isPlayersComplete()) { //send initial gameBoard to all players
 			for(int index = 0; index < NUM_OF_PLAYERS; index++) {
 				players[index].sendMessage(gameLogic.toString());
-//				players[index].sendMessage("board sent");
 			}
 
 		}
-		
-		
-//		try { //pause thread for a millisecond 
-//			this.wait(1);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//		
-//		
+			
 		Thread gameThread = new Thread() {
 			public void run() {
 				int turn = 0; 
 				
-				while(playersComplete && !gameLogic.isFilled()) {
+				while(isPlayersComplete() && !gameLogic.isFilled()) {
 					int currentPlayerIndex = turn % NUM_OF_PLAYERS;  
 					
 					players[currentPlayerIndex].sendMessage("Please enter a column (0-8) *cause you're all engineers*: ");
 					System.out.println("Sent message to : " + players[currentPlayerIndex].getName());
 					for(int index = 0; index < NUM_OF_PLAYERS ; index++) { //send wait message to rest of players 
 						if(index != currentPlayerIndex ) {
-							players[index].sendMessage(players[currentPlayerIndex].getName()); 
+							players[index].sendMessage("Waiting on " + players[currentPlayerIndex].getName()); 
 						}
 					}
 					
@@ -120,9 +143,22 @@ public class Server {
 					
 					do {
 						
-						play = players[currentPlayerIndex].receiveMessage(); 
-						playerColumnEntry = Integer.parseInt(play); 
-						playStatus = gameLogic.fill(playerColumnEntry, currentPlayerIndex);
+						play = players[currentPlayerIndex].receiveMessage();
+						
+						if(play.contains("exception")) {
+							closeConnection(); 
+							return; 
+						}
+						
+						System.out.println(players[currentPlayerIndex].getName() +": " + play);
+						
+						try {
+							playerColumnEntry = Integer.parseInt(play); 
+							playStatus = gameLogic.fill(playerColumnEntry, currentPlayerIndex + 1);
+						}catch (NumberFormatException e) {
+							playStatus = "invalid value";
+						}
+						
 						players[currentPlayerIndex].sendMessage(playStatus);
 					}
 					while( playStatus != "successful") ;
@@ -133,20 +169,24 @@ public class Server {
 						players[index].sendMessage(gameLogic.toString()); 
 					}
 					
-					if(gameLogic.hasWon(currentPlayerIndex)){//check if current player won 
+					if(gameLogic.hasWon(currentPlayerIndex + 1)){//check if current player won 
 						for(int index = 0; index < NUM_OF_PLAYERS ; index++) { //send has won message then proceed to close sockets
 							
 							if(index == currentPlayerIndex) {
-								players[index].sendMessage("You won :)");
+								players[currentPlayerIndex].sendMessage("You won :)");
 							}
 							else {
-								players[index].sendMessage("you lost"); 
+								players[index].sendMessage("You lost"); 
 							}
 						}
 					}
 					
 					turn++;
 					
+				}
+				
+				if(isPlayersComplete() == false) {
+					closeConnection(); 
 				}
 			}
 		};
@@ -155,9 +195,10 @@ public class Server {
 	}
 	
 
+	
 	public static void main(String[] args) {
 		Server mainServer = new Server(); 
-		mainServer.createAndListen(9876);
+		mainServer.createAndListen(9879);
 
 	}
 

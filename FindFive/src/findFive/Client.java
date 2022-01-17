@@ -1,7 +1,7 @@
 /**
- * @author Zino Onokpise
- * Client side of Find Five game
- */
+ *  @author Zino Onokpise
+* Client side of Find Five game
+*/
 package findFive;
 
 import java.io.*;
@@ -40,6 +40,15 @@ public class Client {
 		return response; 
 	}
 	
+	public boolean isClosingMessage(String message) {
+		if(message.contains("closing")) {
+			System.out.println("Game closed"); 
+			return true;
+		}
+		else {
+			return false; 
+		}
+	}
 	
 	public void runGame(int turn) {
 		if(turn <= 0) {
@@ -62,32 +71,45 @@ public class Client {
 			Scanner screenInput = new Scanner(System.in); 
 			String response; 
 			String board;
-			
+					
+
 			public void run() {
 				while(gameStatus) {
 					try {
-						messageStatus = input.readLine();
-						if(messageStatus == "you lost") {
+						do{
+							messageStatus = input.readLine();
+							if(isClosingMessage(messageStatus)) return; 
+						}
+						while(messageStatus.length() == 0);
+						
+						if(messageStatus.contains("You lost")) {
 							System.out.println(messageStatus); 
 							return; 
 						}
-						else if(messageStatus != "Please enter a column (0-8) *cause you're all engineers*: ") {
-							System.out.println("Waiting on " + messageStatus);
+						else if (messageStatus.contains("You won")) {
+							System.out.println(messageStatus); 
+							return; 
 						}
-						else { 
+						else if(messageStatus.contains("Please enter a column")) {
 							do {
-								if(messageStatus != "successful") {
-									System.out.print(messageStatus + ": ");
+								if(!messageStatus.contains("successful")) {
+									System.out.print(messageStatus);
 								}
 								response = screenInput.next(); 
 								output.println(response); 	
 								messageStatus = input.readLine();
+								if(isClosingMessage(messageStatus)) return; 
 							}	
-							while(messageStatus != "successful");
+							while(!messageStatus.contains("successful"));//successful prompt has length = 10, but change right after testing
+						}
+						else { 
+							System.out.println(messageStatus);
 						}
 						
 						board = getGameBoard(ROW_NUM); 
+						if(isClosingMessage(board)) return; 
 						System.out.println(board);
+						
 						
 						
 					} catch (IOException e) {
@@ -120,12 +142,13 @@ public class Client {
 	
 	public static void main(String [] args) {
 		Client player = new Client(); 
-		int turn = Integer.parseInt(player.initiate("127.0.0.1", "himi", 9876));
+		int turn = Integer.parseInt(player.initiate("192.168.0.21", "zino", 9879));
 		
 		player.runGame(turn); 
 		
 		
 	}
 }
+
 
 
