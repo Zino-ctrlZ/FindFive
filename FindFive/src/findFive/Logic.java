@@ -8,8 +8,8 @@ import java.util.Random;
 
 public class Logic {
 	
-	private static final int ROW = 6; 
-	private static final int COLUMN = 9; 
+	public static final int ROW = 6; 
+	public static final int COLUMN = 9; 
 	private char[][] gameBoard ;
 	
 	public Logic() {
@@ -28,12 +28,12 @@ public class Logic {
 		String statusMessage = ""; 
 		//error checking on parameters
 		if( player != 1 && player != 2) {
-			statusMessage += "invalid player integer"; 
+			statusMessage += "invalid player Integer"; //invalid player integer
 			return statusMessage; 
 		}
 		
 		if(columnEntry < 0 || columnEntry >= COLUMN) {
-			statusMessage += "invalid columnEntry";
+			statusMessage += "invalid column Integer"; //invalid column entry
 			return statusMessage; 
 		}
 		
@@ -51,7 +51,7 @@ public class Logic {
 		}
 		
 		if(!isEmpty(gameBoard[rowIndex][columnEntry])) { //this means the entire row has been filled 
-			statusMessage += "Cant place here"; 
+			statusMessage += "Can't place Here"; //can't place here
 			return statusMessage; 
 		}
 		else {
