@@ -28,12 +28,12 @@ public class Logic {
 		String statusMessage = ""; 
 		//error checking on parameters
 		if( player != 1 && player != 2) {
-			statusMessage = "invalid player Integer"; //invalid player integer
+			statusMessage = "invalid player Integer re-enter: "; //invalid player integer
 			return statusMessage; 
 		}
 		
 		if(columnEntry < 0 || columnEntry >= COLUMN) {
-			statusMessage = "invalid column Integer"; //invalid column entry
+			statusMessage = "invalid column Integer re-enter: "; //invalid column entry
 			return statusMessage; 
 		}
 		
@@ -51,7 +51,7 @@ public class Logic {
 		}
 		
 		if(!isEmpty(gameBoard[rowIndex][columnEntry])) { //this means the entire row has been filled 
-			statusMessage += "Can't place Here"; //can't place here
+			statusMessage += "Can't place Here re-enter: "; //can't place here
 			return statusMessage; 
 		}
 		else {

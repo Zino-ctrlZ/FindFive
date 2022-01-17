@@ -7,13 +7,13 @@ package findFive;
 import java.io.*;
 import java.net.*;
 import java.util.Date;
+import java.util.Scanner;
 
 public class Server {
 	private ServerSocket serverSocket; 
 	private Player[] players;  
 	
-	private PrintWriter out; 
-	private BufferedReader in; 
+	private PrintWriter out;  
 	
 	private final int NUM_OF_PLAYERS = 2; 
 	
@@ -38,7 +38,6 @@ public class Server {
 						
 						
 						if(currentPlayers < NUM_OF_PLAYERS ) {  
-							in = new BufferedReader(new InputStreamReader(client.getInputStream())); 
 							out = new PrintWriter(client.getOutputStream(), true); 
 							players[currentPlayers] = new Player(client); 
 							
@@ -101,13 +100,14 @@ public class Server {
 	 * Close connection with all players 
 	 */
 	public void closeConnection() {
-		System.out.print("Players not complete...closing socket");
+		System.out.print("closing socket");
 		for(int index = 0; index < NUM_OF_PLAYERS; index++) {
 			players[index].sendMessage("Game over..closing");
 			players[index].close(); 
 		}
 		try {
 			serverSocket.close();
+			out.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -197,8 +197,12 @@ public class Server {
 
 	
 	public static void main(String[] args) {
+		Scanner screenInput = new Scanner(System.in) ;
+		System.out.println("Enter port number to listen on: "); 
+		int portNumber = screenInput.nextInt(); 
 		Server mainServer = new Server(); 
-		mainServer.createAndListen(9879);
+		mainServer.createAndListen(portNumber);
+		screenInput.close();
 
 	}
 

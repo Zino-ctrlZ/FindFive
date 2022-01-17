@@ -68,6 +68,8 @@ public class Player {
 	public void close() {
 		try {
 			socket.close();
+			output.close();
+			input.close(); 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

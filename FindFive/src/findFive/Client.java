@@ -42,14 +42,29 @@ public class Client {
 	
 	public boolean isClosingMessage(String message) {
 		if(message.contains("closing")) {
-			System.out.println("Game closed"); 
+			gameOver();
 			return true;
 		}
 		else {
 			return false; 
 		}
+		 
 	}
 	
+	/**
+	 * Closing streams 
+	 */
+	private void gameOver() {
+		System.out.println("Game closed"); 
+		try {
+			clientSocket.close(); 
+			output.close(); 
+			input.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+	}
 	public void runGame(int turn) {
 		if(turn <= 0) {
 			System.out.println("Cannot join game now!"); 
@@ -113,7 +128,8 @@ public class Client {
 						
 						
 					} catch (IOException e) {
-						e.printStackTrace();
+						gameOver(); 
+						return; 
 					} 
 				}
 			}
@@ -141,8 +157,19 @@ public class Client {
 	
 	
 	public static void main(String [] args) {
+		
+		if(args.length != 3) {
+			System.out.print("Improper arguments");
+			return; 
+		}
+		
+		String inetAddr = args[0]; 
+		String clientName = args[1]; 
+		int port = Integer.parseInt(args[2]);
+		
+		
 		Client player = new Client(); 
-		int turn = Integer.parseInt(player.initiate("192.168.0.21", "zino", 9879));
+		int turn = Integer.parseInt(player.initiate(inetAddr, clientName, port));
 		
 		player.runGame(turn); 
 		
