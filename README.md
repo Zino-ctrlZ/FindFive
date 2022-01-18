@@ -4,7 +4,7 @@
 1. Clone github repo
 2. import project
 3. Run server class //it is important you know the ip of whatever device runs server class as you will need it for client config
-4. Imput arguments to run Client class. Format: IPAddress NameOfPlayer PortNumberOfServer
+4. Imput arguments to run Client class. Format: ServerIPAddress NameOfPlayer PortNumberOfServer
 5. Run Client Class 
 
 
